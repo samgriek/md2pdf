@@ -30,7 +30,7 @@ import PdfOutputComponent from '../components/PdfOutputComponent.vue';
 import AdComponent from '../components/AdComponent.vue';
 import FooterComponent from '../components/FooterComponent.vue';
 
-const pdf = ref<string | null>(null);
+const pdf = ref<string>('');
 const markdown = ref('');
 const showPreview = ref(false);
 
