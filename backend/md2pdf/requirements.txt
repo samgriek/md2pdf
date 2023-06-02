@@ -1,0 +1,5 @@
+fastapi==0.95.2
+python-multipart==0.0.6
+uvicorn==0.20.0
+weasyprint==59.0
+Markdown==3.4.3

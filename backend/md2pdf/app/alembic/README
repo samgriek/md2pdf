@@ -1,0 +1,17 @@
+Generic single-database configuration.
+
+## Alembic migrations
+> By default the api will apply any outstanding migrations when it is started. After updating the `app.database.models`, run `docker-compose up`, then run the below command to generate the migration (note that you must review that it was created correctly)
+```bash
+docker exec -it contenz-io-api-1 alembic revision --autogenerate -m "migration message"
+```
+
+### Test your migration locally
+> build
+```bash
+docker build -t <image_name>:latest .
+```
+> run
+```bash
+docker-compose up
+```
