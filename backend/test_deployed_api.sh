@@ -1,0 +1,1 @@
+curl -X POST -H "Content-Type: application/json" -H "x-api-key: zUyxmEJaXlaUXMxxKjQD39j1mNaRtPO5wax7AcM0" -d '{"markdown":"YOUR_MARKDOWN_TEXT"}' https://vmnsibc7zc.execute-api.us-west-2.amazonaws.com/default/convert -o output.pdf

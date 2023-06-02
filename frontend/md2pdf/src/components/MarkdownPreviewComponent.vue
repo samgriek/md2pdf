@@ -1,7 +1,7 @@
 <template>
-  <div v-html="renderedMarkdown" class="border p-2"></div>
+  <div v-html="renderedMarkdown" class="border p-2 h-100 overflow-auto"></div>
 </template>
-  
+
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue';
 import { marked } from 'marked';
@@ -18,4 +18,3 @@ watchEffect(() => {
   }
 });
 </script>
-  

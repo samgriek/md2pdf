@@ -1,71 +1,49 @@
 <template>
-    <div class="container bg-dark">
-        <header-component></header-component>
-
-        <div class="row">
-            <div class="col-md-6">
-                <markdown-input-component @convert="convertMarkdown" @toggleView="toggleView"
-                    @updateMarkdown="updateMarkdown"></markdown-input-component>
-
-                <!-- <markdown-input-component @convert="convertMarkdown" @toggleView="toggleView"></markdown-input-component> -->
-                <markdown-preview-component v-if="showPreview" :markdown="markdown"></markdown-preview-component>
-            </div>
-            <div class="col-md-6">
-                <pdf-output-component :pdf="pdf"></pdf-output-component>
-            </div>
+    <div class="d-flex flex-column vh-100">
+      <header-component @convert="convertMarkdownText"></header-component>
+  
+      <div class="d-flex flex-grow-1 overflow-auto">
+        <div class="w-50 overflow-auto">
+          <markdown-input-component @updateMarkdown="updateMarkdown"></markdown-input-component>
         </div>
-
-        <ad-component></ad-component>
-
-        <footer-component></footer-component>
+  
+        <div class="w-50 overflow-auto">
+          <pdf-output-component :pdf="pdf"></pdf-output-component>
+        </div>
+      </div>
     </div>
 </template>
-  
+
 <script setup lang="ts">
 import { ref, defineComponent } from 'vue';
 import HeaderComponent from '../components/HeaderComponent.vue';
 import MarkdownInputComponent from '../components/MarkdownInputComponent.vue';
-import MarkdownPreviewComponent from '../components/MarkdownPreviewComponent.vue';
 import PdfOutputComponent from '../components/PdfOutputComponent.vue';
-import AdComponent from '../components/AdComponent.vue';
-import FooterComponent from '../components/FooterComponent.vue';
+import { convertMarkdown } from '../api';
 
-const pdf = ref<string | null>(null);
+const pdf = ref<string>('');
 const markdown = ref('');
-const showPreview = ref(false);
 
 const updateMarkdown = (newMarkdown: string) => {
-  markdown.value = newMarkdown;
+    markdown.value = newMarkdown;
 };
 
-const convertMarkdown = async (markdownText: string) => {
-    markdown.value = markdownText;
-    const response = await fetch('http://localhost:20081/convert', {
-        method: 'POST',
-        body: JSON.stringify({ markdown: markdownText }),
-        headers: { 'Content-Type': 'application/json' },
-    });
-    const data = await response.blob();
-
-    const pdfUrl = URL.createObjectURL(data);
-    console.log(pdfUrl)
-
+const convertMarkdownText = async () => {
+    const pdfUrl = await convertMarkdown(markdown.value);
     pdf.value = pdfUrl;
-};
-
-const toggleView = () => {
-    showPreview.value = !showPreview.value;
 };
 
 defineComponent({
     components: {
         HeaderComponent,
         MarkdownInputComponent,
-        MarkdownPreviewComponent,
         PdfOutputComponent,
-        AdComponent,
-        FooterComponent,
     },
 });
 </script>
-  
+
+<style>
+* {
+    border-radius: 0 !important;
+}
+</style>

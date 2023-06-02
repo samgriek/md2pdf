@@ -8,5 +8,5 @@ docker build -t md2pdf-api:latest .
 
 ## run api in docker
 ```bash
-docker run -p 20081:20081 md2pdf-api:latest
+docker run -p 81:81 md2pdf-api:latest
 ```

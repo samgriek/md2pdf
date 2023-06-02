@@ -6,5 +6,3 @@ import MainView from './views/MainView.vue';
 <template>
   <MainView/>
 </template>
-
- 

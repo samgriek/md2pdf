@@ -1,0 +1,50 @@
+name: Docker Build and Push to ECR
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-west-2
+  API_ECR_REPOSITORY: md2pdf-api
+  SPA_ECR_REPOSITORY: md2pdf
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Read image tag from file
+      id: read-tag
+      run: echo "::set-output name=tag::$(cat imagetag.txt)"
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build and push API Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: ./backend/md2pdf
+        file: ./backend/md2pdf/Dockerfile
+        push: true
+        tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.API_ECR_REPOSITORY }}:${{ steps.read-tag.outputs.tag }}
+
+    - name: Build and push SPA Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: ./frontend/md2pdf
+        file: ./frontend/md2pdf/Dockerfile
+        push: true
+        tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.SPA_ECR_REPOSITORY }}:${{ steps.read-tag.outputs.tag }}
