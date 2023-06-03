@@ -1,50 +1,10 @@
-provider "aws" {
-  region = "us-west-2"
-}
-
-data "aws_caller_identity" "current" {}
-
-resource "aws_ecr_repository" "repository" {
-  name = "md2pdf"
-}
-
-resource "aws_iam_role" "role" {
-  name = "md2pdf-role"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_policy" {
-  role       = aws_iam_role.role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_lambda_function" "md2pdf_function" {
-  function_name = "md2pdf"
-
-  image_uri = "${aws_ecr_repository.repository.repository_url}:latest"
-
-  package_type = "Image"
-  role         = aws_iam_role.role.arn
-  timeout      = 60
-}
+variable "lambda_arn" {}
+variable "api_name" {}
+variable "usage_plan_name" {}
+variable "api_key_name" {}
 
 resource "aws_api_gateway_rest_api" "api" {
-  name        = "md2pdf-api"
+  name        = var.api_name
   description = "My REST API"
 }
 
@@ -68,7 +28,7 @@ resource "aws_api_gateway_integration" "lambda" {
 
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.md2pdf_function.invoke_arn
+  uri                     = var.lambda_arn
 }
 
 resource "aws_api_gateway_deployment" "deployment" {
@@ -80,14 +40,13 @@ resource "aws_api_gateway_deployment" "deployment" {
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.md2pdf_function.function_name
+  function_name = aws_lambda_function.lambda_function.function_name
   principal     = "apigateway.amazonaws.com"
-
   source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/*/*/*"
 }
 
 resource "aws_api_gateway_usage_plan" "usage_plan" {
-  name        = "md2pdf-usage-plan"
+  name        = var.usage_plan_name
   description = "A usage plan for my API"
 
   api_stages {
@@ -108,7 +67,7 @@ resource "aws_api_gateway_usage_plan" "usage_plan" {
 }
 
 resource "aws_api_gateway_api_key" "api_key" {
-  name        = "md2pdf-api-key"
+  name        = var.api_key_name
   description = "md2pdf API Key"
   enabled     = true
 }
@@ -117,15 +76,4 @@ resource "aws_api_gateway_usage_plan_key" "usage_plan_key" {
   key_id        = aws_api_gateway_api_key.api_key.id
   key_type      = "API_KEY"
   usage_plan_id = aws_api_gateway_usage_plan.usage_plan.id
-}
-
-output "api_key_value" {
-  value     = aws_api_gateway_api_key.api_key.value
-  sensitive = true
-}
-
-output "api_endpoint" {
-  description = "The URL of the API Gateway REST API"
-  value       = aws_api_gateway_deployment.deployment.invoke_url
-  sensitive   = false
 }

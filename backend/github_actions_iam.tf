@@ -28,7 +28,12 @@ resource "aws_iam_user_policy" "github_actions" {
         "ecr:InitiateLayerUpload",
         "ecr:UploadLayerPart",
         "ecr:CompleteLayerUpload",
-        "ecr:PutImage"
+        "ecr:PutImage",
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
       ],
       "Resource": "*"
     }

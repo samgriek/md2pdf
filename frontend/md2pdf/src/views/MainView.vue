@@ -29,6 +29,7 @@ import MarkdownPreviewComponent from '../components/MarkdownPreviewComponent.vue
 import PdfOutputComponent from '../components/PdfOutputComponent.vue';
 import AdComponent from '../components/AdComponent.vue';
 import FooterComponent from '../components/FooterComponent.vue';
+import { convertMarkdown } from '../api';
 
 const pdf = ref<string>('');
 const markdown = ref('');
@@ -38,18 +39,9 @@ const updateMarkdown = (newMarkdown: string) => {
   markdown.value = newMarkdown;
 };
 
-const convertMarkdown = async (markdownText: string) => {
+const convertMarkdownText = async (markdownText: string) => {
     markdown.value = markdownText;
-    const response = await fetch('http://localhost:20081/convert', {
-        method: 'POST',
-        body: JSON.stringify({ markdown: markdownText }),
-        headers: { 'Content-Type': 'application/json' },
-    });
-    const data = await response.blob();
-
-    const pdfUrl = URL.createObjectURL(data);
-    console.log(pdfUrl)
-
+    const pdfUrl = await convertMarkdown(markdownText);
     pdf.value = pdfUrl;
 };
 
