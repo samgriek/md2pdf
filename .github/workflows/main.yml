@@ -31,7 +31,7 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
       with:
-        context: ./backend/md2pdf
+        context: .
         file: .backend/md2pdf/Dockerfile
         push: true
         tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
