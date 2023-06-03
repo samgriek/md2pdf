@@ -18,13 +18,15 @@ jobs:
         cd frontend/md2pdf
         npm install
         npm run build
+      env:
+        VUE_APP_API_KEY: ${{ secrets.VUE_APP_API_KEY }}
 
     - name: Deploy to S3
       uses: jakejarvis/s3-sync-action@master
       with:
         args: --acl public-read --follow-symlinks --delete
       env:
-        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_S3_BUCKET: ${{ secrets.CLOUDFRONT_AWS_S3_BUCKET }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: 'us-west-2'  # or your preferred AWS region
