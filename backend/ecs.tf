@@ -12,7 +12,7 @@ resource "aws_ecs_task_definition" "task" {
 [
   {
     "name": "md2pdf-api",
-    "image": "my-registry-url/md2pdf-api:latest",
+    "image": "036117471787.dkr.ecr.us-west-2.amazonaws.com/md2pdf-api:latest",
     "essential": true,
     "portMappings": [
       {

@@ -26,20 +26,3 @@ resource "aws_route53_record" "validation" {
   records = [element(tolist(aws_acm_certificate.alb_cert.domain_validation_options), 0).resource_record_value]
   ttl     = 60
 }
-
-
-resource "aws_acm_certificate_validation" "cert_validation" {
-  certificate_arn         = aws_acm_certificate.alb_cert.arn
-  validation_record_fqdns = ["${aws_route53_record.validation.fqdn}"]
-}
-
-
-output "certificate_validation_cname" {
-  description = "The CNAME record to add to your DNS configuration for certificate validation"
-  value = {
-    name = tolist(aws_acm_certificate.alb_cert.domain_validation_options)[0].resource_record_name
-    type = tolist(aws_acm_certificate.alb_cert.domain_validation_options)[0].resource_record_type
-    value = tolist(aws_acm_certificate.alb_cert.domain_validation_options)[0].resource_record_value
-  }
-}
-
