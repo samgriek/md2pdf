@@ -19,20 +19,58 @@ resource "aws_security_group" "ec2_sg" {
   }
 }
 
-
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"
   public_key = file("~/.ssh/private_id_ed25519.pub")
 }
 
+data "aws_ami" "ecs" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-ecs-hvm-*-x86_64-ebs"]
+  }
+}
+
+resource "aws_iam_instance_profile" "ecs_instance_profile" {
+  name = "ecs_instance_profile"
+  role = "AmazonEC2ContainerServiceforEC2Role" # This role needs to be created in your AWS account
+}
+
+# resource "aws_instance" "web" {
+#   ami                  = data.aws_ami.ecs.id
+#   instance_type        = "t2.micro"
+#   key_name             = aws_key_pair.deployer.key_name
+#   security_groups      = [aws_security_group.ec2_sg.name]
+#   iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name
+#   subnet_id            = aws_subnet.subnet3.id
+
+#   user_data = <<-EOF
+#               #!/bin/bash
+#               echo ECS_CLUSTER=${aws_ecs_cluster.cluster.name} >> /etc/ecs/ecs.config
+#               EOF
+
+#   tags = {
+#     Name = "API_SERVER"
+#   }
+# }
 
 resource "aws_instance" "web" {
-  ami           = "ami-05f6435f6fe49a9e1" 
+  ami           = data.aws_ami.ecs.id
   instance_type = "t2.micro"
-  key_name = aws_key_pair.deployer.key_name
-  security_groups = [aws_security_group.ec2_sg.name]
-  
+  key_name      = aws_key_pair.deployer.key_name
+  iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name
+  vpc_security_group_ids = [aws_security_group.allow_http_https_ssh.id]
+  subnet_id              = aws_subnet.subnet3.id
+
+  user_data = <<-EOF
+              #!/bin/bash
+              echo ECS_CLUSTER=${aws_ecs_cluster.cluster.name} >> /etc/ecs/ecs.config
+              EOF
+
   tags = {
-    Name = "API_SERVER"
+    Name = "API_SERVER" 
   }
 }

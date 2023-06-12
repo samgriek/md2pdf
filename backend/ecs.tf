@@ -58,3 +58,8 @@ resource "aws_ecs_service" "service" {
     type = "ECS"
   }
 }
+
+
+resource "aws_cloudwatch_log_group" "example" {
+  name = "/ecs/api-md2pdf"
+}
