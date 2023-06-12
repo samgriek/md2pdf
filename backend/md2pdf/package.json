@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "marked-gfm-heading-id": "^3.0.4"
+  }
+}

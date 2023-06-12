@@ -4,7 +4,7 @@
 
         <div class="row">
             <div class="col-md-6">
-                <markdown-input-component @convert="convertMarkdown" @toggleView="toggleView"
+                <markdown-input-component @convert="convertMarkdownText" @toggleView="toggleView"
                     @updateMarkdown="updateMarkdown"></markdown-input-component>
 
                 <!-- <markdown-input-component @convert="convertMarkdown" @toggleView="toggleView"></markdown-input-component> -->

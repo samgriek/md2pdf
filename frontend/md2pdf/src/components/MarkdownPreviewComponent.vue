@@ -18,4 +18,20 @@ watchEffect(() => {
   }
 });
 </script>
-  
+
+<style scoped>
+blockquote {
+  padding: 10px 20px;
+  margin: 0 0 20px;
+  font-size: 17.5px;
+  border-left: 5px solid #eeeeee;
+}
+code {
+  border: 2px;
+  border-color: black;
+  background-color: black;
+  font-size: 2rem;
+
+}
+
+</style>
