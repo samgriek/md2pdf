@@ -6,10 +6,12 @@ resource "aws_lb" "alb" {
   subnets            = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
 }
 
-resource "aws_lb_listener" "http" {
+resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.alb.arn
-  port              = "80"
-  protocol          = "HTTP"
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.alb_cert.arn
 
   default_action {
     type = "forward"
@@ -17,15 +19,16 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+
 resource "aws_lb_target_group" "group" {
   name     = "api-md2pdf-tg"
-  port     = 80
-  protocol = "HTTP"
+  port     = 443
+  protocol = "HTTPS"
   vpc_id   = aws_vpc.main.id
 }
 
 resource "aws_lb_listener_rule" "rule" {
-  listener_arn = aws_lb_listener.http.arn
+  listener_arn = aws_lb_listener.https.arn
 
   action {
     type             = "forward"
