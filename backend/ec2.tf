@@ -59,7 +59,7 @@ resource "aws_iam_instance_profile" "ecs_instance_profile" {
 
 resource "aws_instance" "web" {
   ami           = data.aws_ami.ecs.id
-  instance_type = "t2.micro"
+  instance_type = "t3.small"
   key_name      = aws_key_pair.deployer.key_name
   iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name
   vpc_security_group_ids = [aws_security_group.allow_http_https_ssh.id]
