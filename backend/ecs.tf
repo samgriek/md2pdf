@@ -2,12 +2,27 @@ resource "aws_ecs_cluster" "cluster" {
   name = "apis"
 }
 
+resource "aws_ecs_service" "service" {
+  name            = "api-md2pdf"
+  cluster         = aws_ecs_cluster.cluster.id
+  task_definition = aws_ecs_task_definition.task.arn
+  desired_count   = 1
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.group.arn
+    container_name   = "md2pdf-api"
+    container_port   = 80
+  }
+
+  deployment_controller {
+    type = "ECS"
+  }
+}
+
 resource "aws_ecs_task_definition" "task" {
   family                   = "api-md2pdf"
   network_mode             = "bridge"
   requires_compatibilities = ["EC2"]
-  cpu                      = "256"
-  memory                   = "512"
   container_definitions    = <<DEFINITION
 [
   {
@@ -41,7 +56,7 @@ resource "aws_ecs_task_definition" "task" {
         "value": "TBD"
       }
     ],
-    "cpu": 256,
+    "cpu": 512,
     "memory": 512,
     "memoryReservation": 256
   }
@@ -49,24 +64,8 @@ resource "aws_ecs_task_definition" "task" {
 DEFINITION
 }
 
-resource "aws_ecs_service" "service" {
-  name            = "api-md2pdf"
-  cluster         = aws_ecs_cluster.cluster.id
-  task_definition = aws_ecs_task_definition.task.arn
-  desired_count   = 1
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.group.arn
-    container_name   = "md2pdf-api"
-    container_port   = 80
-  }
-
-  deployment_controller {
-    type = "ECS"
-  }
-}
-
 
 resource "aws_cloudwatch_log_group" "example" {
   name = "/ecs/api-md2pdf"
 }
+

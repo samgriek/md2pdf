@@ -1,6 +1,6 @@
 resource "aws_security_group" "ec2_sg" {
-  name        = "allow_http_https_ssh"
-  description = "Allow inbound HTTP, HTTPS, SSH traffic"
+  name        = "allow_https_ssh"
+  description = "Allow inbound HTTPS, SSH traffic"
 
   ingress {
     description = "HTTPS"
@@ -39,24 +39,6 @@ resource "aws_iam_instance_profile" "ecs_instance_profile" {
   role = "AmazonEC2ContainerServiceforEC2Role" # This role needs to be created in your AWS account
 }
 
-# resource "aws_instance" "web" {
-#   ami                  = data.aws_ami.ecs.id
-#   instance_type        = "t2.micro"
-#   key_name             = aws_key_pair.deployer.key_name
-#   security_groups      = [aws_security_group.ec2_sg.name]
-#   iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name
-#   subnet_id            = aws_subnet.subnet3.id
-
-#   user_data = <<-EOF
-#               #!/bin/bash
-#               echo ECS_CLUSTER=${aws_ecs_cluster.cluster.name} >> /etc/ecs/ecs.config
-#               EOF
-
-#   tags = {
-#     Name = "API_SERVER"
-#   }
-# }
-
 resource "aws_instance" "web" {
   ami           = data.aws_ami.ecs.id
   instance_type = "t3.small"
@@ -64,6 +46,7 @@ resource "aws_instance" "web" {
   iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name
   vpc_security_group_ids = [aws_security_group.allow_http_https_ssh.id]
   subnet_id              = aws_subnet.subnet3.id
+  associate_public_ip_address = true
 
   user_data = <<-EOF
               #!/bin/bash
