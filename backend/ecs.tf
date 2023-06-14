@@ -56,8 +56,8 @@ resource "aws_ecs_task_definition" "task" {
         "value": "TBD"
       }
     ],
-    "cpu": 512,
-    "memory": 512,
+    "cpu": 1024,
+    "memory": 1024,
     "memoryReservation": 256
   }
 ]

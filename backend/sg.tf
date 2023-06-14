@@ -18,32 +18,33 @@ resource "aws_security_group" "lb_sg" {
   }
 }
 
+resource "aws_security_group" "ec2_sg" {
+  name        = "allow_https_ssh"
+  description = "Allow inbound HTTPS, SSH traffic"
+  vpc_id      = aws_vpc.main.id
 
-resource "aws_security_group" "allow_http_https_ssh" {
-  name   = "allow_http_https_ssh"
-  vpc_id = aws_vpc.main.id
+  # ingress {
+  #   description = "HTTPS"
+  #   from_port   = 443
+  #   to_port     = 443
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
 
   ingress {
+    description      = "allow traffic from ALB"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    security_groups  = [aws_security_group.lb_sg.id]
+  }
+
+  ingress {
+    description = "SSH"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "ECS tasks"
-    from_port   = 32768
-    to_port     = 61000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["90.77.241.44/32"] // change <your-ip> to your IP address
   }
 
   egress {
@@ -51,9 +52,5 @@ resource "aws_security_group" "allow_http_https_ssh" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-  
-  tags = {
-    Name = "allow_http_https_ssh"
   }
 }
