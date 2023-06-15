@@ -19,13 +19,13 @@ resource "aws_iam_instance_profile" "ecs_instance_profile" {
 }
 
 resource "aws_instance" "web" {
-  ami           = data.aws_ami.ecs.id
-  instance_type = "t3.small"
-  key_name      = aws_key_pair.deployer.key_name
-  iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name
+  ami                    = data.aws_ami.ecs.id
+  instance_type          = "t3.small"
+  key_name               = aws_key_pair.deployer.key_name
+  iam_instance_profile   = aws_iam_instance_profile.ecs_instance_profile.name
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
   subnet_id              = aws_subnet.subnet3.id
-  associate_public_ip_address = true
+  # associate_public_ip_address = true
 
   user_data = <<-EOF
               #!/bin/bash
@@ -33,6 +33,6 @@ resource "aws_instance" "web" {
               EOF
 
   tags = {
-    Name = "API_SERVER" 
+    Name = "API_SERVER"
   }
 }

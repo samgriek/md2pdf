@@ -5,7 +5,7 @@ export async function convertMarkdown(markdownText: string): Promise<string> {
     // }
 
     // const api_url = process.env.VUE_APP_API_URL;
-    const api_url = "http://localhost:20081"
+    const api_url = "https://api-md2pdf.griekinc.com"
     if (!api_url) {
         throw new Error('API url is not defined')
     }
