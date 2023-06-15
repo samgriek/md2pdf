@@ -40,51 +40,100 @@ resource "aws_s3_bucket_website_configuration" "ui_md2pdf_bucket_website_configu
   }
 }
 
-# must be manually applied
-# resource "aws_s3_bucket_policy" "bucket_policy" {
-#   bucket = aws_s3_bucket.ui_md2pdf_bucket.id
+data "aws_route53_zone" "griekinc" {
+  name = "griekinc.com"
+}
 
-#   policy = <<-POLICY
-#   {
-#     "Version":"2012-10-17",
-#     "Statement":[
-#       {
-#         "Sid":"PublicReadGetObject",
-#         "Effect":"Allow",
-#         "Principal": "*",
-#         "Action":["s3:GetObject"],
-#         "Resource":["arn:aws:s3:::${aws_s3_bucket.ui_md2pdf_bucket.id}/*"],
-#         "Condition" : {
-#           "IpAddress" : { 
-#             "aws:SourceIp": [
-#                 "173.245.48.0/20",
-#                 "103.21.244.0/22",
-#                 "103.22.200.0/22",
-#                 "103.31.4.0/22",
-#                 "141.101.64.0/18",
-#                 "108.162.192.0/18",
-#                 "190.93.240.0/20",
-#                 "188.114.96.0/20",
-#                 "197.234.240.0/22",
-#                 "198.41.128.0/17",
-#                 "162.158.0.0/15",
-#                 "104.16.0.0/13",
-#                 "104.24.0.0/14",
-#                 "172.64.0.0/13",
-#                 "131.0.72.0/22",
-#                 "2400:cb00::/32",
-#                 "2606:4700::/32",
-#                 "2803:f800::/32",
-#                 "2405:b500::/32",
-#                 "2405:8100::/32",
-#                 "2a06:98c0::/29",
-#                 "2c0f:f248::/32"
-#             ] 
-#           }
-#         }
-#       }
-#     ]
-#   }
-#   POLICY
-# }
+resource "aws_route53_record" "md2pdf" {
+  zone_id = data.aws_route53_zone.griekinc.zone_id
+  name    = "md2pdf.griekinc.com"
+  type    = "A"
+  alias {
+    name                   = aws_cloudfront_distribution.s3_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+
+provider "aws" {
+  alias  = "useast1"
+  region = "us-east-1"
+}
+
+resource "aws_acm_certificate" "us_east_1_cert" {
+  provider            = aws.useast1
+  domain_name         = "griekinc.com"
+  validation_method   = "DNS"
+  subject_alternative_names = ["*.griekinc.com"]
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+
+resource "aws_cloudfront_origin_access_identity" "oai" {
+  comment = "OAI for md2pdf.griekinc.com"
+}
+
+resource "aws_cloudfront_distribution" "s3_distribution" {
+  enabled         = true
+  is_ipv6_enabled = true
+  comment         = "S3 Distribution for md2pdf.griekinc.com"
+
+  origin {
+    domain_name = aws_s3_bucket.ui_md2pdf_bucket.bucket_regional_domain_name
+    origin_id   = "ui-md2pdf"
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
+    }
+  }
+
+  default_root_object = "index.html"
+
+  default_cache_behavior {
+    target_origin_id = "ui-md2pdf"
+
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods   = ["GET", "HEAD"]
+    compress         = true
+
+    forwarded_values {
+      query_string = false
+      headers      = ["Origin", "Accept-Encoding", "Access-Control-Request-Method", "Access-Control-Request-Headers"]
+
+      cookies {
+        forward = "none"
+      }
+    }
+
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+
+  viewer_certificate {
+  acm_certificate_arn      = aws_acm_certificate.us_east_1_cert.arn
+  ssl_support_method       = "sni-only"
+  minimum_protocol_version = "TLSv1.2_2021"
+}
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  tags = {
+    Name        = "md2pdf-cloudfront-distribution"
+    Environment = "production"
+  }
+}
+
+output "cloudfront_domain_name" {
+  value = aws_cloudfront_distribution.s3_distribution.domain_name
+}
 
