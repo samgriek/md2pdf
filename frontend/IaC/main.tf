@@ -44,6 +44,22 @@ data "aws_route53_zone" "griekinc" {
   name = "griekinc.com"
 }
 
+provider "aws" {
+  alias  = "useast1"
+  region = "us-east-1"
+}
+
+resource "aws_acm_certificate" "us_east_1_cert" {
+  provider            = aws.useast1
+  domain_name         = "md2pdf.griekinc.com"
+  validation_method   = "DNS"
+  subject_alternative_names = ["*.griekinc.com"]
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+
 resource "aws_route53_record" "md2pdf" {
   zone_id = data.aws_route53_zone.griekinc.zone_id
   name    = "md2pdf.griekinc.com"
@@ -52,22 +68,6 @@ resource "aws_route53_record" "md2pdf" {
     name                   = aws_cloudfront_distribution.s3_distribution.domain_name
     zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
     evaluate_target_health = false
-  }
-}
-
-
-provider "aws" {
-  alias  = "useast1"
-  region = "us-east-1"
-}
-
-resource "aws_acm_certificate" "us_east_1_cert" {
-  provider            = aws.useast1
-  domain_name         = "griekinc.com"
-  validation_method   = "DNS"
-  subject_alternative_names = ["*.griekinc.com"]
-  lifecycle {
-    create_before_destroy = true
   }
 }
 
@@ -87,6 +87,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
+      
     }
   }
 
@@ -95,9 +96,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   default_cache_behavior {
     target_origin_id = "ui-md2pdf"
 
-    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods   = ["GET", "HEAD"]
-    compress         = true
+    allowed_methods = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods  = ["GET", "HEAD"]
+    compress        = true
 
     forwarded_values {
       query_string = false
@@ -114,12 +115,11 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     max_ttl                = 86400
   }
 
-
   viewer_certificate {
-  acm_certificate_arn      = aws_acm_certificate.us_east_1_cert.arn
-  ssl_support_method       = "sni-only"
-  minimum_protocol_version = "TLSv1.2_2021"
-}
+    acm_certificate_arn      = aws_acm_certificate.us_east_1_cert.arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
+  }
 
   restrictions {
     geo_restriction {
