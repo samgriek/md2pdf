@@ -1,23 +1,28 @@
 <template>
-    <div class="container bg-dark">
-        <header-component></header-component>
+    <div style="background-color: tan; padding: 20px;">
+        <div class="container rounded-bottom" style="border-radius: 15px;">
+            <header-component></header-component>
+            <div class=bg-light style="padding: 20px;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <markdown-input-component @convert="convertMarkdownText" @toggleView="toggleView"
+                            @updateMarkdown="updateMarkdown"></markdown-input-component>
 
-        <div class="row">
-            <div class="col-md-6">
-                <markdown-input-component @convert="convertMarkdownText" @toggleView="toggleView"
-                    @updateMarkdown="updateMarkdown"></markdown-input-component>
-
-                <!-- <markdown-input-component @convert="convertMarkdown" @toggleView="toggleView"></markdown-input-component> -->
-                <markdown-preview-component v-if="showPreview" :markdown="markdown"></markdown-preview-component>
+                        <markdown-preview-component v-if="showPreview" :markdown="markdown"></markdown-preview-component>
+                    </div>
+                    <div class="col-md-6">
+                        <pdf-output-component :pdf="pdf"></pdf-output-component>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6">
-                <pdf-output-component :pdf="pdf"></pdf-output-component>
+            <div class="bg-light rounded-bottom" style="padding: 20px;">
+                <ad-component></ad-component>
+            </div>
+            <div style="padding: 10px; background-color: tan;">
+
+                <footer-component></footer-component>
             </div>
         </div>
-
-        <ad-component></ad-component>
-
-        <footer-component></footer-component>
     </div>
 </template>
   
@@ -36,7 +41,7 @@ const markdown = ref('');
 const showPreview = ref(false);
 
 const updateMarkdown = (newMarkdown: string) => {
-  markdown.value = newMarkdown;
+    markdown.value = newMarkdown;
 };
 
 const convertMarkdownText = async (markdownText: string) => {

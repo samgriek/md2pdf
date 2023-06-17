@@ -1,8 +1,8 @@
 <template>
-    <nav class="navbar navbar-dark bg-dark">
+    <nav class="navbar navbar-light rounded-top" style="background-color: skyblue;">
       <div class="container-fluid">
-        <h1 class="navbar-brand" href="#">Markdown to PDF Converter</h1>
-        <a class="btn btn-outline-success" href="https://www.buymeacoffee.com/yourusername" target="_blank">Buy Me a Coffee</a>
+        <h1 class="navbar-brand text-dark" href="#">Markdown to PDF Converter</h1>
+        <a class="btn btn-success" href="https://www.buymeacoffee.com/yourusername" target="_blank">Buy Me a Coffee</a>
       </div>
     </nav>
   </template>
